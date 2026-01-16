@@ -1,4 +1,4 @@
-export const getMovieData = async () => {
+export const getMovieData = async (pageNumber) => {
     const options = {
       method: 'GET',
       headers: {
@@ -7,7 +7,7 @@ export const getMovieData = async () => {
       }
     };
 
-    const res = await fetch('https://api.themoviedb.org/3/movie/popular?language=en-US&page=1', options)
+    const res = await fetch(`https://api.themoviedb.org/3/movie/popular?language=en-US&page=${pageNumber}`, options)
     const data = await res.json()
     return data.results
 }

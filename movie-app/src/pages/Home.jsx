@@ -23,15 +23,18 @@ export default function Home() {
   const [movies, setMovies] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [pageNumber, setPageNumber] = useState(1)
+  const [showPagination, setShowPagination] = useState(true)
 
 
   useEffect(() => {
     const getData = async function(){
+      if(!pageNumber) return
+      setLoading(true)
       try{
-        const res = await getMovieData()
+        const res = await getMovieData(pageNumber)
         console.log(res);
         setMovies(res)
-        // setMovies(test)        
       }catch(err){
         console.log(err);
         setError(err)
@@ -41,13 +44,15 @@ export default function Home() {
     }
 
     getData()
-  }, [])
+  }, [pageNumber])
 
 
   const handleSearch = async (e) => {
     e.preventDefault()
     if(!search.trim()) return;
+    setPageNumber(null)
     setLoading(true)
+    setShowPagination(false)
     try{
       const res = await searchMovieData(search)
       setError(null)
@@ -61,12 +66,19 @@ export default function Home() {
     }
   }
 
+  const reset = () => {
+    setPageNumber(1)
+    setShowPagination(true)
+    setSearch("")
+  }
+
   return (
     <div className='home'>
         <div className='searchbox'>
+          {!showPagination && <button className='clear' onClick={reset}>X</button>}
           <form onSubmit={handleSearch}>
-            <input type='text' placeholder='Search Movie' value={search} onChange={e => setSearch(e.target.value)} />
-            <button>Search</button>
+            <input type='text' placeholder='Search Movie' value={search} onChange={e => setSearch(e.target.value)} />            
+            <button className='submit' type='submit'>Search</button>
           </form>
         </div>
         
@@ -80,6 +92,15 @@ export default function Home() {
                 return <Moviebox movie={movie} key={movie.id} />
               })
             }
+          </div>}
+
+          {showPagination && <div className='pagination'>
+            <ul>
+              <li><button className={pageNumber === 1 ? 'active' : ''} onClick={() => setPageNumber(1)}>1</button></li>
+              <li><button className={pageNumber === 2 ? 'active' : ''} onClick={() => setPageNumber(2)}>2</button></li>
+              <li><button className={pageNumber === 3 ? 'active' : ''} onClick={() => setPageNumber(3)}>3</button></li>
+              <li><button className={pageNumber === 4 ? 'active' : ''} onClick={() => setPageNumber(4)}>4</button></li>
+            </ul>
           </div>}
     </div>
   )
