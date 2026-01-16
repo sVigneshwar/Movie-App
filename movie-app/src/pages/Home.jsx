@@ -88,9 +88,9 @@ export default function Home() {
         ? <div className='loading'></div>
         : <div className='movie-grid'>
             {
-              movies.map(movie => {
+              movies.length === 0 ? <p className='no-result'>No result found...</p> : movies.map(movie => {
                 return <Moviebox movie={movie} key={movie.id} />
-              })
+              })              
             }
           </div>}
 
