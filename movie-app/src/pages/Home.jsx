@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import Moviebox from '../component/Moviebox'
-import { getMovieData } from '../services/movieData'
+import { getMovieData, searchMovieData } from '../services/movieData'
 
 const SAMPLE_IMAGE = "https://image.tmdb.org/t/p/w500/pHpq9yNUIo6aDoCXEBzjSolywgz.jpg"
 
@@ -19,17 +19,19 @@ const test = Array.from({length:10}).map((_,i) => ({
 }))
 
 export default function Home() {
+  const [search, setSearch] = useState("")
   const [movies, setMovies] = useState([])
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(false)
+  const [error, setError] = useState(null)
 
 
   useEffect(() => {
     const getData = async function(){
       try{
-        // const res = await getMovieData()
-        // console.log(res);
-        setMovies(test)
+        const res = await getMovieData()
+        console.log(res);
+        setMovies(res)
+        // setMovies(test)        
       }catch(err){
         console.log(err);
         setError(err)
@@ -41,15 +43,38 @@ export default function Home() {
     getData()
   }, [])
 
+
+  const handleSearch = async (e) => {
+    e.preventDefault()
+    if(!search.trim()) return;
+    setLoading(true)
+    try{
+      const res = await searchMovieData(search)
+      setError(null)
+      setMovies(res)
+    }catch(err){
+      console.log(error);
+      setError(err)
+      
+    }finally{
+      setLoading(false)
+    }
+  }
+
   return (
     <div className='home'>
         <div className='searchbox'>
-          <input type='text' placeholder='Search Movie' />
-          <button>Search</button>
+          <form onSubmit={handleSearch}>
+            <input type='text' placeholder='Search Movie' value={search} onChange={e => setSearch(e.target.value)} />
+            <button>Search</button>
+          </form>
         </div>
         
+        {/* <div className='loading'></div> */}
         {error && <p>Somthing went wrong...</p>}
-        {loading ? <p className='loading'>Loading...</p>: <div className='movie-grid'>
+        {loading 
+        ? <div className='loading'></div>
+        : <div className='movie-grid'>
             {
               movies.map(movie => {
                 return <Moviebox movie={movie} key={movie.id} />

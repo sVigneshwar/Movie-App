@@ -11,3 +11,9 @@ export const getMovieData = async () => {
     const data = await res.json()
     return data.results
 }
+
+export const searchMovieData = async (query) => {
+    const res = await fetch(`https://api.themoviedb.org/3/search/movie?api_key=cdf3b850f18dcd155a842c3acae11f3d&query=${encodeURIComponent(query)}`)
+    const data = await res.json()
+    return data.results
+}
