@@ -245,6 +245,7 @@ body {
 .loading {
     font-size: 0;
     text-align: center;
+    min-height: 60vh;
 }
 
 .loading:after {
