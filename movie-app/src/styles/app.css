@@ -25,7 +25,7 @@ body{
   align-items:center;
   justify-content:space-between;
   padding:14px 20px;
-  background: linear-gradient(180deg, rgba(0,0,0,0.55), rgba(0,0,0,0));
+  background: linear-gradient(180deg, rgb(0 0 0), rgb(0 0 0 / 35%));
   position:sticky;
   top:0;
   z-index:20;
@@ -41,7 +41,7 @@ body{
     gap: 8px;
     background: rgb(255 255 255 / 12%);
     border-radius: 999px;
-    margin: 0 auto;
+    margin: 10px auto 0;
     position: relative;
     max-width: 600px;}
 .searchbox input{    background: transparent;
@@ -52,7 +52,7 @@ body{
     padding: 17px 20px;
     font-size: 17px;}
 .searchbox input::placeholder{color:var(--muted)}
-.searchbox button{    background: var(--accent);
+.searchbox button{       background: var(--accent);
     color: #fff;
     border: 0;
     padding: 8px 10px;
@@ -66,20 +66,58 @@ body{
     border-radius: 9999px;
     width: 160px;
     font-size: 15px;
-    letter-spacing: 3px;}
+    letter-spacing: 2px;
+    font-weight: 600;}
 .searchbox button:hover{opacity:0.95}
 
 /* Movie grid & box (App.jsx: .movie-grid, .movie-box, .movie-box-inner) */
-.movie-grid{display:grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap:16px; padding:18px}
+.movie-grid{display:grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap:16px; padding:18px}
 .movie-box{position:relative; background:var(--panel); border-radius:var(--radius); overflow:hidden; box-shadow:var(--card-shadow); transition:transform 180ms, box-shadow 180ms}
-.movie-box img{width:100%; height:220px; object-fit:cover; display:block}
-.movie-box-inner{padding:10px}
+.movie-box img{width:100%; height:350px; object-fit:cover; display:block}
+.movie-box-inner{padding:10px; position: relative;}
 .movie-name{font-size:14px; font-weight:700; color:#fff; margin-bottom:6px}
 .movie-year{font-size:12px; color:var(--muted)}
 .movie-box:hover{transform:translateY(-6px); box-shadow:0 16px 36px rgba(0,0,0,0.7)}
+.movie-image{position: relative;overflow: hidden;}
+.movie-image:before{
+    content: '';
+    display: block;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    position: absolute;
+    
+    opacity: 0.3;
+    top: 100%;
+    /* Permalink - use to edit and share this gradient: https://colorzilla.com/gradient-editor/#ffffff+0,000000+100&0+0,1+100,1+100 */
+    background: linear-gradient(to bottom,  rgba(255,255,255,0) 0%,rgba(0,0,0,1) 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+
+}
+.movie-box-inner:hover .movie-image:before{
+    top: 0%;
+    transition: 0.3s;
+}
+.movie-box-inner:hover .movie-fav-icon{opacity: 1;}
 
 /* Favorite icon & empty state (App.jsx: .movie-fav-icon, .no-favoites) */
-.movie-fav-icon{position:absolute; top:10px; right:10px; width:36px; height:36px; display:flex; align-items:center; justify-content:center; background:rgba(0,0,0,0.45); border-radius:8px; color:var(--muted);user-select: none; cursor: pointer;}
+.movie-fav-icon{    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgb(0 0 0);
+    border-radius: 8px;
+    color: #ffffff;
+    user-select: none;
+    cursor: pointer;
+    opacity: 0;
+    transition: 0.3s;
+}
+
 .movie-fav-icon.liked{color:var(--accent)}
 .no-favoites{text-align:center; color:var(--muted); padding:36px}
 
@@ -89,6 +127,6 @@ body{
 
 /* Responsive */
 @media (max-width:900px){ .movie-grid{grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));} .movie-box img{height:180px} }
-@media (max-width:520px){ .searchbox{min-width:120px} .movie-box img{height:150px} }
+@media (max-width:520px){ .searchbox{min-width:120px; width: 90%;;} .movie-box img{height:150px} }
 
 
