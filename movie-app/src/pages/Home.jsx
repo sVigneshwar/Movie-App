@@ -46,6 +46,10 @@ export default function Home() {
     getData()
   }, [pageNumber])
 
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }, [pageNumber])
+
 
   const handleSearch = async (e) => {
     e.preventDefault()
