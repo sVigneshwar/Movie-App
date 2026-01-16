@@ -221,6 +221,12 @@ body {
     border: none;
 }
 
+@media (max-width: 767px){
+    .movie-fav-icon {
+        opacity: 1;
+    }
+}
+
 .movie-fav-icon.liked {
     color: var(--accent)
 }
