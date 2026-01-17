@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import Moviebox from '../component/Moviebox'
 import { getMovieData, searchMovieData } from '../services/movieData'
-import useApiCache from '../custom-hook/useApiCache'
+import { useApiCache } from '../context/CacheContext'
 
 export default function Home() {
   const [search, setSearch] = useState("")

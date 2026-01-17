@@ -6,6 +6,7 @@ import Favorites from './pages/Favorites'
 import {Routes, Route} from 'react-router-dom'
 import MovieProvider from './context/movieContext'
 
+
 function App() {
   return (
     <>
