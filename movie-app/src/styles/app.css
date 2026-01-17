@@ -131,6 +131,9 @@ body {
     gap: 16px;
     padding: 18px
 }
+.movie-box{
+    position: relative;
+}
 
 .movie-box img {
     width: 100%;
@@ -150,6 +153,7 @@ body {
     box-shadow: var(--card-shadow);
     transition: transform 180ms, box-shadow 180ms;
     transition: 0.3s;
+    cursor: pointer;
 }
 
 .movie-name {
@@ -199,6 +203,7 @@ body {
 
 .movie-box:hover .movie-fav-icon {
     opacity: 1;
+    transform: translateY(-6px);
 }
 
 /* Favorite icon & empty state (App.jsx: .movie-fav-icon, .no-favoites) */
@@ -219,6 +224,7 @@ body {
     opacity: 0;
     transition: 0.3s;
     border: none;
+    z-index: 1;
 }
 
 @media (max-width: 767px){
@@ -372,4 +378,9 @@ p.no-result {
     font-weight: 500;
     font-style: italic;
     color: var(--muted);
+}
+
+/* modal */
+.ReactModal__Overlay {
+    background: rgb(0 0 0 / 75%) !important;
 }
