@@ -1,22 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import Moviebox from '../component/Moviebox'
 import { getMovieData, searchMovieData } from '../services/movieData'
-
-const SAMPLE_IMAGE = "https://image.tmdb.org/t/p/w500/pHpq9yNUIo6aDoCXEBzjSolywgz.jpg"
-
-function randomTitle(){
-  const adj = ["Dark","Lost","Silent","Last","Hidden","Crimson","Burning","Golden","Frozen","Broken","Secret","Midnight"]
-  const noun = ["Empire","Night","Journey","Promise","Horizon","Legacy","Echo","Shadows","Reckoning","Passage","Galaxy","Memory"]
-  return `${adj[Math.floor(Math.random()*adj.length)]} ${noun[Math.floor(Math.random()*noun.length)]}`
-}
-
-// generate 10 test movies using the same poster image and random titles
-const test = Array.from({length:10}).map((_,i) => ({
-  id: i+1,
-  poster_path: SAMPLE_IMAGE,
-  title: randomTitle(),
-  release_date: "2025-08-16"
-}))
+import useApiCache from '../custom-hook/useApiCache'
 
 export default function Home() {
   const [search, setSearch] = useState("")
@@ -25,15 +10,28 @@ export default function Home() {
   const [error, setError] = useState(null)
   const [pageNumber, setPageNumber] = useState(1)
   const [showPagination, setShowPagination] = useState(true)
+  const {getFromCache, setInCache, deleteCache} = useApiCache()
 
 
   useEffect(() => {
     const getData = async function(){
       if(!pageNumber) return
+
+      // set cache
+      const cachedData = getFromCache("popular", {page: pageNumber})
+      if(cachedData){
+        console.log("data from cachce")
+        setMovies(cachedData)
+        setLoading(false)
+        return
+      }
+
       setLoading(true)
       try{
         const res = await getMovieData(pageNumber)
         console.log(res);
+
+        setInCache("popular", {page: pageNumber}, res)
         setMovies(res)
       }catch(err){
         console.log(err);
@@ -54,12 +52,25 @@ export default function Home() {
   const handleSearch = async (e) => {
     e.preventDefault()
     if(!search.trim()) return;
+
+    // set cache
+    const cachedData = getFromCache("search", {query: search})
+    if(cachedData){
+      console.log("data from cachce")
+      setMovies(cachedData)
+      setPageNumber(null)
+      setLoading(false)
+      setShowPagination(false)
+      return
+    }
+    
     setPageNumber(null)
     setLoading(true)
     setShowPagination(false)
     try{
       const res = await searchMovieData(search)
       setError(null)
+      setInCache("search", {query: search}, res)
       setMovies(res)
     }catch(err){
       console.log(error);
@@ -109,3 +120,19 @@ export default function Home() {
     </div>
   )
 }
+
+/* const SAMPLE_IMAGE = "https://image.tmdb.org/t/p/w500/pHpq9yNUIo6aDoCXEBzjSolywgz.jpg"
+
+function randomTitle(){
+  const adj = ["Dark","Lost","Silent","Last","Hidden","Crimson","Burning","Golden","Frozen","Broken","Secret","Midnight"]
+  const noun = ["Empire","Night","Journey","Promise","Horizon","Legacy","Echo","Shadows","Reckoning","Passage","Galaxy","Memory"]
+  return `${adj[Math.floor(Math.random()*adj.length)]} ${noun[Math.floor(Math.random()*noun.length)]}`
+}
+
+// generate 10 test movies using the same poster image and random titles
+const test = Array.from({length:10}).map((_,i) => ({
+  id: i+1,
+  poster_path: SAMPLE_IMAGE,
+  title: randomTitle(),
+  release_date: "2025-08-16"
+})) */
