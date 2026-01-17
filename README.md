@@ -1,6 +1,6 @@
 # Movie App - Netflix Style UI
 
-A modern movie browsing application built with React and Vite, featuring a Netflix-inspired dark theme with smooth animations and responsive design.
+A modern movie browsing application built with React and Vite, featuring a Netflix-inspired dark theme with smooth animations, intelligent caching, and detailed movie modals.
 
 ## 🎬 Features
 
@@ -8,8 +8,10 @@ A modern movie browsing application built with React and Vite, featuring a Netfl
 - **Movie Grid** - Responsive grid layout displaying movies with hover effects and shadow animations
 - **Search Functionality** - Search for movies with real-time filtering
 - **Pagination** - Browse through pages of movies with active state highlighting
+- **API Caching** - Smart cache system that persists across navigation for faster data retrieval
+- **Movie Details Modal** - Click any movie to view detailed information in a beautiful modal
 - **Loading Animation** - Custom CSS-based spinning loader (no GIFs)
-- **Favorites** - Heart icon for marking favorite movies (like/unlike state)
+- **Favorites** - Heart icon for marking favorite movies with persistent storage
 - **Smooth Scrolling** - Auto scroll to top when changing pages
 - **Responsive Design** - Works seamlessly on mobile, tablet, and desktop devices
 
@@ -18,8 +20,10 @@ A modern movie browsing application built with React and Vite, featuring a Netfl
 - **React 19** - UI framework
 - **Vite 7** - Build tool & dev server
 - **React Router DOM 7** - Client-side routing
+- **React Modal** - Beautiful modal dialogs
+- **Context API** - State management (Movies, Cache)
 - **CSS3** - Custom Netflix-style styling with animations
-- **JavaScript ES6+**
+- **TMDB API** - Movie data source
 
 ## 📁 Project Structure
 
@@ -27,17 +31,23 @@ A modern movie browsing application built with React and Vite, featuring a Netfl
 movie-app/
 ├── src/
 │   ├── pages/
-│   │   ├── Home.jsx          # Main home page with search, grid, pagination
-│   │   └── Favorites.jsx     # Favorites page
+│   │   ├── Home.jsx                # Main home page with search, grid, pagination
+│   │   └── Favorites.jsx           # Favorites page
 │   ├── component/
-│   │   └── Moviebox.jsx      # Individual movie card component
+│   │   ├── Moviebox.jsx            # Individual movie card component
+│   │   ├── MovieDetailsModal.jsx   # Movie details modal component
+│   │   └── Navbar.jsx              # Navigation bar
+│   ├── context/
+│   │   ├── movieContext.jsx        # Movie favorites context
+│   │   └── CacheContext.jsx        # API cache context
 │   ├── services/
-│   │   └── movieData.js      # API calls for fetching movies
+│   │   └── movieData.js            # API calls for fetching movies
 │   ├── styles/
-│   │   └── app.css           # Netflix-style global styles
-│   ├── App.jsx               # Main app wrapper with navbar
-│   └── main.jsx              # React entry point
-├── public/                   # Static assets
+│   │   ├── app.css                 # Netflix-style global styles
+│   │   └── moviebox-modal.css      # Movie details modal styles
+│   ├── App.jsx                     # Main app wrapper with navbar
+│   └── main.jsx                    # React entry point
+├── public/                         # Static assets
 ├── package.json
 ├── vite.config.js
 └── index.html
@@ -119,18 +129,47 @@ npm run lint
 
 ### `Home.jsx`
 - Manages state for movies, loading, errors, and pagination
+- Integrates **CacheContext** for intelligent API caching
 - Fetches movies based on page number or search query
+- Caches results by page and search query to avoid duplicate API calls
 - Displays loading spinner, error messages, or movie grid
 - Auto-scrolls to top on page change with smooth animation
+- Handles cache persistence when navigating between pages
 
 ### `Moviebox.jsx`
 - Renders individual movie card with poster image
-- Displays title and release year
-- Heart icon for marking favorites
-- Hover overlay with gradient effect
+- Displays title, release year, and hover states
+- Heart icon for marking favorites (with persistent state)
+- Integrated **MovieDetailsModal** for showing detailed information
+- Click card to open detailed modal with full movie information
+
+### `MovieDetailsModal.jsx`
+- Beautiful modal dialog displaying comprehensive movie information:
+  - **Header**: Movie title, original title (if different), rating, year, and vote count
+  - **Poster & Backdrop**: High-quality images with gradient overlays
+  - **Genres**: Display all genres with interactive badges
+  - **Overview**: Full movie synopsis
+  - **Action Buttons**: Watch Now & Save/Unsave favorites
+  - **Details Grid**: Language, popularity, content rating, release date
+- Netflix-inspired dark theme with smooth animations
+- Fully responsive design for all screen sizes
+- Genre mapping for 19+ movie categories
+
+### `CacheContext.jsx`
+- Global Context API provider for caching API responses
+- Stores cached data in component memory (persists during session)
+- Provides hooks: `getFromCache()`, `setInCache()`, `clearCache()`
+- Prevents redundant API calls for same page/search query
+- Integrated throughout the app via custom `useApiCache()` hook
+
+### `MovieContext.jsx`
+- Manages favorite movies state
+- Provides: `addToFav()`, `removeFromFav()`, `isFav()`
+- Allows toggling favorites from both cards and modals
 
 ### `App.jsx`
-- Root component with navbar
+- Root component with **CacheProvider** wrapper
+- Navigation bar with routes
 - Routes to Home and Favorites pages
 
 ## 🎯 Color Scheme
@@ -156,24 +195,65 @@ npm run lint
 - **Favorites**: Click heart icon to like/unlike movies
 - **Smooth Scrolling**: Auto-scroll to top when changing pages
 
-## 🔗 API Integration
+## � Caching System
 
-The app uses `movieData.js` service module for:
-- `getMovieData(pageNumber)` - Fetch movies by page
-- `searchMovieData(query)` - Search for movies
+The app implements a smart **Context API-based caching system** that improves performance and user experience:
 
-### Test Data
-During development, a test array of 10 random movies is used with placeholder poster images from TMDB.
+### How It Works
+1. **Pagination Caching** - Results for each page (1-4) are cached after first fetch
+2. **Search Caching** - Search results are cached by query string
+3. **Session Persistence** - Cache persists while browsing (cleared on app reload)
+4. **Zero Duplicate Requests** - Same page/query returns cached data instantly
+
+### Benefits
+- ⚡ **Faster Navigation** - Navigate between pages without re-fetching
+- 📊 **Reduced API Calls** - Fewer requests to TMDB API
+- 🔄 **Seamless UX** - Go back to favorites and return to cached page instantly
+- 📱 **Better Mobile Performance** - Reduces data usage on limited connections
+
+### Usage in Components
+```jsx
+const { getFromCache, setInCache, deleteCache } = useApiCache()
+
+// Check cache first
+const cachedData = getFromCache("popular", { page: pageNumber })
+if (cachedData) {
+  setMovies(cachedData)
+  return
+}
+
+// Fetch and cache
+const res = await getMovieData(pageNumber)
+setInCache("popular", { page: pageNumber }, res)
+```
+
+## 🎬 Movie Details Modal
+
+Click any movie card to open an elegant modal displaying:
+- **Movie Poster & Backdrop** - High-quality images
+- **Title & Metadata** - Original title, rating (★/10), year, vote count
+- **Genres** - Interactive genre badges with 19+ categories
+- **Synopsis** - Full movie overview/description
+- **Action Buttons**:
+  - **Watch Now** - Play button (placeholder for future functionality)
+  - **Save** - Add/remove from favorites with live state
+- **Additional Info** - Language, popularity score, content rating (18+/PG), release date
+- **Netflix-Style Design** - Dark theme with red accents, smooth animations, and gradient overlays
+- **Responsive** - Optimized for all screen sizes (mobile, tablet, desktop)
 
 ## 🚧 Future Enhancements
 
-- [ ] Movie detail page with full information
-- [ ] User authentication for saved favorites
-- [ ] Genre filtering
-- [ ] Sort options (rating, release date, etc.)
-- [ ] Movie reviews and ratings
-- [ ] Watchlist functionality
-- [ ] Dark/Light theme toggle
+- [ ] Cache TTL (Time-to-Live) - Auto-expire cached data after X minutes
+- [ ] LocalStorage/SessionStorage - Persist cache even after page refresh
+- [ ] Movie trailer integration - Play trailers in modal
+- [ ] User authentication - Save favorites to database
+- [ ] Genre filtering - Filter movies by selected genres
+- [ ] Advanced sort options - Sort by rating, release date, popularity
+- [ ] Movie reviews and user ratings - Community feedback section
+- [ ] Enhanced watchlist - Create custom watchlists
+- [ ] Dark/Light theme toggle - User preference persistence
+- [ ] Movie recommendations - Similar movies suggestions
+- [ ] Cast and crew information - Display actors and director details
 
 ## 📄 License
 
